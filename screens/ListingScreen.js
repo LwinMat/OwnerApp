@@ -2,6 +2,8 @@ import {View, Text, StyleSheet, Platform, StatusBar, SafeAreaView, TextInput, Sw
 
 import React from 'react';
 
+import { db } from '../firebaseConfig';
+
 const ListingScreen = ({navigation}) => {
     return (
         <SafeAreaView style={[styles.container]}>
