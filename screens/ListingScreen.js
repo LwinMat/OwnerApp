@@ -61,7 +61,7 @@ const ListingScreen = ({ navigation }) => {
             };
 
             // Add this object to Firebase collection
-            const docRef = await addDoc(collection(db, 'booking'), newData);
+            const docRef = await addDoc(collection(db, 'rentalListings'), newData);
             console.log('Document written with ID: ', docRef.id);
             // You can navigate to another screen if needed
             // navigation.navigate('NextScreen');
