@@ -1,33 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Platform, StatusBar, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Platform, StatusBar, SafeAreaView, Button, Alert } from 'react-native';
 import { db } from '../firebaseConfig';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 const BookingScreen = ({ navigation }) => {
-    const [listings, setListings] = useState([]);
+    const [bookings, setBookings] = useState([]);
 
     useEffect(() => {
-        const fetchListings = async () => {
+        const fetchBookings = async () => {
             try {
                 const querySnapshot = await getDocs(collection(db, 'booking'));
                 const data = querySnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
-                setListings(data);
+                setBookings(data);
             } catch (error) {
-                console.error('Error fetching listings: ', error);
+                console.error('Error fetching bookings: ', error);
             }
         };
 
-        fetchListings();
+        fetchBookings();
 
         // Cleanup function to unsubscribe when component unmounts
         return () => {};
     }, []);
 
+    const handleAccept = async (id) => {
+        try {
+            const bookingRef = doc(db, 'booking', id);
+            await updateDoc(bookingRef, {
+                status: 'Accepted',
+            });
+            console.log('Booking accepted:', id);
+            Alert.alert('Booking Accepted', 'You have accepted the booking.');
+        } catch (error) {
+            console.error('Error accepting booking:', error);
+        }
+    };
+
+    const handleDecline = async (id) => {
+        try {
+            const bookingRef = doc(db, 'booking', id);
+            await updateDoc(bookingRef, {
+                status: 'Declined',
+            });
+            console.log('Booking declined:', id);
+            Alert.alert('Booking Declined', 'You have declined the booking.');
+        } catch (error) {
+            console.error('Error declining booking:', error);
+        }
+    };
+
     const renderItem = ({ item }) => (
-        <TouchableOpacity style={styles.itemContainer}>
+        <View style={styles.itemContainer}>
             <Text style={styles.itemText}>Service Type: {item.serviceType}</Text>
             <Text style={styles.itemText}>Description: {item.description}</Text>
             <Text style={styles.itemText}>City: {item.city}</Text>
@@ -38,14 +64,26 @@ const BookingScreen = ({ navigation }) => {
             {item.imageUrl && (
                 <Image source={{ uri: item.imageUrl }} style={styles.image} />
             )}
-        </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+                <Button
+                    title="Accept"
+                    onPress={() => handleAccept(item.id)}
+                    color="green"
+                />
+                <Button
+                    title="Decline"
+                    onPress={() => handleDecline(item.id)}
+                    color="red"
+                />
+            </View>
+        </View>
     );
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.headingText}>Previous Listings</Text>
+            <Text style={styles.headingText}>Booking Requests</Text>
             <FlatList
-                data={listings}
+                data={bookings}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 style={{ marginTop: 10 }}
@@ -81,6 +119,11 @@ const styles = StyleSheet.create({
         height: 200,
         borderRadius: 10,
         alignSelf: 'center',
+        marginTop: 10,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         marginTop: 10,
     },
 });
