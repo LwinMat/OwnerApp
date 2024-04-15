@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import { Entypo, FontAwesome6 } from '@expo/vector-icons';
+import { Entypo, FontAwesome6, FontAwesome } from '@expo/vector-icons';
 
 import 'react-native-gesture-handler';
 
@@ -14,6 +14,7 @@ import LoginScreen from './screens/LoginScreen';
 import ListingScreen from './screens/ListingScreen';
 import BookingScreen from './screens/BookingScreen';
 
+import Profile from './screens/Profile';
 
 
 const Stack = createStackNavigator();
@@ -24,6 +25,7 @@ function TabNavigator() {
     <Tab.Navigator>
       <Tab.Screen name="Listing" component={ListingScreen} options={{tabBarIcon: ()=>{return(<Entypo name="add-to-list" size={24} color="black" />)}}}/>
       <Tab.Screen name="Booking" component={BookingScreen} options={{tabBarIcon: ()=>{return(<FontAwesome6 name="book-open" size={24} color="black" />)}}}/>
+      <Tab.Screen name="Profile" component={Profile} options={{tabBarIcon: ()=>{return(<FontAwesome name="user" size={24} color="black" />)}}} />
     </Tab.Navigator>
   );
 }
