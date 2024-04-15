@@ -73,6 +73,7 @@ const ListingScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView style={{ flexDirection: 'column' }}>
+                <Text>List your Service:</Text>
                 <View style={styles.Views}>
                     <Text style={styles.text}>Enter Service Type:</Text>
                     <TextInput
