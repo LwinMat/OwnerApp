@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Platform, StatusBar, SafeAreaView, TextInput, S
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage } from '../firebaseConfig';
 import { addDoc, collection } from 'firebase/firestore';
+import {ref, uploadBytesResumable } from 'firebase/storage';
 
 const ListingScreen = ({ navigation }) => {
     const [serviceType, setServiceType] = useState('');
@@ -15,38 +16,47 @@ const ListingScreen = ({ navigation }) => {
     const [imageUri, setImageUri] = useState(null);
 
     const handleChoosePhoto = async () => {
-        try {
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [4, 3],
-                quality: 1,
-            });
-            if (!result.cancelled) {
-                setImageUri(result.uri);
-            }
-        } catch (error) {
-            console.error('Error choosing photo: ', error);
-        }
-    };
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+        console.log(result);
 
-    const handleUploadPhoto = async () => {
+        if (result.canceled === true) {
+            console.log('No photo selected');
+            setImageUri(null);
+            return null;
+        }
+
+        setImageUri(result.assets[0].uri);
+
+        console.log('Photo selected:', imageUri);
+
+    };
+    
+
+    const saveImageToFirebase = async () => {
+        const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1, imageUri.length);
+
+        //const storageRef = ref(storage, filename);
+        const storageRef = ref(storage, 'images/' + filename);
+
         try {
             const response = await fetch(imageUri);
             const blob = await response.blob();
-            const imageName = new Date().getTime().toString();
-            const ref = storage.ref().child(`images/${imageName}`);
-            await ref.put(blob);
-            const url = await ref.getDownloadURL();
-            return url;
+            await uploadBytesResumable(storageRef, blob);
+            console.log('Image uploaded to Firebase Storage:', filename);
+            return filename;
         } catch (error) {
-            console.error('Error uploading photo: ', error);
+            console.error('Error uploading image:', error);
         }
     };
 
     const handleSubmit = async () => {
         try {
-            const imageUrl = imageUri ? await handleUploadPhoto() : null;
+            const imageUrl = await saveImageToFirebase();
 
             // Create an object with the form data
             const newData = {
