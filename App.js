@@ -5,6 +5,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
+import { Entypo, FontAwesome6 } from '@expo/vector-icons';
+
 import 'react-native-gesture-handler';
 
 // import screens
@@ -20,8 +22,8 @@ const Tab = createBottomTabNavigator();
 function TabNavigator() {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Listing" component={ListingScreen} />
-      <Tab.Screen name="Booking" component={BookingScreen} />
+      <Tab.Screen name="Listing" component={ListingScreen} options={{tabBarIcon: ()=>{return(<Entypo name="add-to-list" size={24} color="black" />)}}}/>
+      <Tab.Screen name="Booking" component={BookingScreen} options={{tabBarIcon: ()=>{return(<FontAwesome6 name="book-open" size={24} color="black" />)}}}/>
     </Tab.Navigator>
   );
 }
