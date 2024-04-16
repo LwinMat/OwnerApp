@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
       padding:20,
       paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
       paddingLeft: Platform.OS === "android" ? StatusBar.currentWidth : 0,
-      paddingBottom: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+      //paddingBottom: Platform.OS === "android" ? StatusBar.currentHeight : 0,
       paddingRight: Platform.OS === "android" ? StatusBar.currentWidth : 0
     },
     headingText: {

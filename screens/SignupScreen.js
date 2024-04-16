@@ -115,6 +115,10 @@ const SignupScreen = ({navigation}) => {
                         <Text style={[styles.text, {color:'white'}]}>SignUp</Text>
                     </Pressable>
 
+                    <Pressable style={[styles.Button]} onPress={()=>{navigation.navigate('Welcome')} }>
+                        <Text style={[styles.text, {color:'white'}]}>Back</Text>
+                    </Pressable>
+
                 </View>
                
 
@@ -133,7 +137,7 @@ const styles = StyleSheet.create({
       padding:20,
       paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
       paddingLeft: Platform.OS === "android" ? StatusBar.currentWidth : 0,
-      paddingBottom: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+      //paddingBottom: Platform.OS === "android" ? StatusBar.currentHeight : 0,
       paddingRight: Platform.OS === "android" ? StatusBar.currentWidth : 0
     },
     headingText: {
