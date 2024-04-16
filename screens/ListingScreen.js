@@ -46,8 +46,12 @@ const ListingScreen = ({ navigation }) => {
 
     const handleSubmit = async () => {
         try {
-            const imageUrl = imageUri ? await handleUploadPhoto() : null;
-
+            let imageUrl = null;
+    
+            if (imageUri) {
+                imageUrl = await handleUploadPhoto();
+            }
+    
             // Create an object with the form data
             const newData = {
                 serviceType: serviceType,
@@ -57,18 +61,21 @@ const ListingScreen = ({ navigation }) => {
                 price: price,
                 includingParts: includingParts,
                 includingLabor: includingLabor,
-                imageUrl: imageUrl, // Add image URL to data
             };
-
-            // Add this object to Firebase collection
+    
+            // Add imageUrl 
+            if (imageUrl) {
+                newData.imageUrl = imageUrl;
+            }
+    
             const docRef = await addDoc(collection(db, 'rentalListings'), newData);
             console.log('Document written with ID: ', docRef.id);
-            // You can navigate to another screen if needed
-            // navigation.navigate('NextScreen');
+            
         } catch (error) {
             console.error('Error handling form submission: ', error);
         }
     };
+    
 
     return (
         <SafeAreaView style={styles.container}>
