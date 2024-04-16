@@ -5,95 +5,48 @@ import { db, auth } from '../firebaseConfig'
 
 // TODO: import the specific functions from the service
 import { collection, addDoc } from "firebase/firestore";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 
-const LoginScreen = ({navigation}) => {
 
-    const [firstName, setfirstName] = useState("");
-    const [lastName, setlastName] = useState("");
+const LoginScreen = ({navigation}) =>{
+
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
-    const [error,setError] = useState(null);
 
-    const buttonPressed = async () => {
+    const loginPressed = async () => {
+        try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password)
+        console.log(`loginPressed: Who is the currently logged in user? ${auth.currentUser.uid}`)
+       // alert("Login complete!");
+        navigation.navigate('Home');
+        } catch(error) {
+        console.log(`Error code: ${error.code}`)
+        console.log(`Error message: ${error.message}`)
+        // full error message
+        console.log(error)
+        }
+        }
         
-        const user = {
-            f_name : firstName,
-            l_name : lastName,
-            u_email: email,
-            is_owner : true, 
-            bookings : [],
-            profile_image : "https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_960_720.png"
-        }
-
-        try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-        console.log("Account creation success")
-        console.log(userCredential)
-        alert("Account created!")
-      } catch (err) {
-        setError(err)
-        console.log("Error when creating user")
-        console.log(`Error code: ${err.code}`)
-        console.log(`Error message: ${err.message}`)
-        return;
-      }
-   
- 
- 
- 
-        // insert into database
-        try {
-            // this code inserts into the "students" collecction
-            // addDoc() will return you a copy of the document that was inserted
-            const docRef = await addDoc(collection(db, "users"), user)
-           // alert("Data inserted, check console for output")
-            console.log(`Id of inserted document is: ${docRef.id}`);
-            navigation.navigate('Home')
-        } catch (err) {
-            console.log(err)
-            setError(err)
-        }
- 
- 
-   }
- 
- 
- 
 
 
-
-
-    return (
-        <SafeAreaView style={[styles.container]}>
-            {/* <Text>Booking Screen</Text> */}
-
-
-            <View style={{marginTop: 50, flex: 0.9}}>
+return(
+    
+<SafeAreaView style={[styles.container]}>
+        
+<View style={{marginTop: 50, flex: 0.9}}>
                 <View style={styles.headingBar}>
-                <Text style={{fontFamily: 'Menlo', fontSize:46, alignContent:"center"}}>Owner Account</Text>
-                </View>
-                <View style={[styles.myfields]}>
-                    <Text style={styles.text}> First Name:</Text>
-                    <TextInput
-                        style={[styles.Input]} onChangeText={setfirstName} value={firstName} 
-                    />
-
-                </View>
-
-                <View style={[styles.myfields]}>
-                    <Text style={styles.text}>Last Name:</Text>
-                    <TextInput
-                        style={[styles.Input]} onChangeText={setlastName} value={lastName} 
-                    />
-
+                <Text style={{fontFamily: 'Menlo', fontSize:46, alignContent:"center"}}>Renter Login</Text>
                 </View>
                 
+
+                
+
 
                 <View style={[styles.myfields]}>
                     <Text style={styles.text}>Email:</Text>
                     <TextInput
-                        style={[styles.Input]} onChangeText={setEmail} value={email} 
+                        style={[styles.Input]} onChangeText={setEmail} value={email} type="email" 
                     />
 
                 </View>
@@ -107,25 +60,28 @@ const LoginScreen = ({navigation}) => {
                     />
                 </View>
                 <Text style={{fontSize:17, paddingLeft:40, fontWeight:"bold"}}>Welcome to the Renter App of Bike&Ride</Text>
-                <Text style={{fontSize:15, paddingHorizontal:50, paddingTop:20, textAlign:"center"}}>Here you can choose from a wide range
-                of listings to get your dream bike. Create an account to start searching for your dream bike through your very own Renter Account </Text>
-                </View>
+                <Text style={{fontSize:15, paddingHorizontal:50, paddingTop:20, textAlign:"center"}}> Login to your existing Renter Account  </Text>
+                
 
-                <View >
-                    <Pressable style={[styles.Button]} onPress={buttonPressed }>
+               
+           
+
+
+            </View>
+            <View >
+                    <Pressable style={[styles.Button]} onPress={loginPressed }>
                         <Text style={[styles.text, {color:'white'}]}>Login</Text>
                     </Pressable>
 
                 </View>
-               
 
-
-            
         </SafeAreaView>
-    );
+    
+);
 }
 
 export default LoginScreen;
+
 
 const styles = StyleSheet.create({
     container: {
@@ -177,7 +133,6 @@ const styles = StyleSheet.create({
         backgroundColor:'white',
         width: 180,
         paddingLeft:20,
-        fontSize: 20
     },
     DescriptionInput:{
         height: 100, 

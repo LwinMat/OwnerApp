@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Platform, StatusBar, SafeAreaView, TextInput, S
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage } from '../firebaseConfig';
 import { addDoc, collection } from 'firebase/firestore';
-import {ref, uploadBytesResumable } from 'firebase/storage';
 
 const ListingScreen = ({ navigation }) => {
     const [serviceType, setServiceType] = useState('');
@@ -16,48 +15,43 @@ const ListingScreen = ({ navigation }) => {
     const [imageUri, setImageUri] = useState(null);
 
     const handleChoosePhoto = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-        console.log(result);
-
-        if (result.canceled === true) {
-            console.log('No photo selected');
-            setImageUri(null);
-            return null;
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 1,
+            });
+            if (!result.cancelled) {
+                setImageUri(result.uri);
+            }
+        } catch (error) {
+            console.error('Error choosing photo: ', error);
         }
-
-        setImageUri(result.assets[0].uri);
-
-        console.log('Photo selected:', imageUri);
-
     };
-    
 
-    const saveImageToFirebase = async () => {
-        const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1, imageUri.length);
-
-        //const storageRef = ref(storage, filename);
-        const storageRef = ref(storage, 'images/' + filename);
-
+    const handleUploadPhoto = async () => {
         try {
             const response = await fetch(imageUri);
             const blob = await response.blob();
-            await uploadBytesResumable(storageRef, blob);
-            console.log('Image uploaded to Firebase Storage:', filename);
-            return filename;
+            const imageName = new Date().getTime().toString();
+            const ref = storage.ref().child(`images/${imageName}`);
+            await ref.put(blob);
+            const url = await ref.getDownloadURL();
+            return url;
         } catch (error) {
-            console.error('Error uploading image:', error);
+            console.error('Error uploading photo: ', error);
         }
     };
 
     const handleSubmit = async () => {
         try {
-            const imageUrl = await saveImageToFirebase();
-
+            let imageUrl = null;
+    
+            if (imageUri) {
+                imageUrl = await handleUploadPhoto();
+            }
+    
             // Create an object with the form data
             const newData = {
                 serviceType: serviceType,
@@ -67,18 +61,21 @@ const ListingScreen = ({ navigation }) => {
                 price: price,
                 includingParts: includingParts,
                 includingLabor: includingLabor,
-                imageUrl: imageUrl, // Add image URL to data
             };
-
-            // Add this object to Firebase collection
+    
+            // Add imageUrl 
+            if (imageUrl) {
+                newData.imageUrl = imageUrl;
+            }
+    
             const docRef = await addDoc(collection(db, 'rentalListings'), newData);
             console.log('Document written with ID: ', docRef.id);
-            // You can navigate to another screen if needed
-            // navigation.navigate('NextScreen');
+            
         } catch (error) {
             console.error('Error handling form submission: ', error);
         }
     };
+    
 
     return (
         <SafeAreaView style={styles.container}>

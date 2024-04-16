@@ -39,10 +39,9 @@ const BookingScreen = ({ navigation }) => {
     };
 
     const renderItem = ({ item }) => {
-        let statusColor = '#2ecc71'; // Default color for confirmed bookings
+        let statusColor = '#2ecc71'; 
         if (item.status === 'CANCELLED') {
-            statusColor = '#e74c3c'; // Red for cancelled bookings
-        }
+            statusColor = '#e74c3c'; }
 
         return (
             <View style={[styles.bookingItem, { borderColor: statusColor }]}>
