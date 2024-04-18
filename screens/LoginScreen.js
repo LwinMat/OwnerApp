@@ -39,11 +39,12 @@ const LoginScreen = ({navigation}) =>{
          
         
       })
-      setUser(resultsFromDB[0])
-      console.log("email is " + user.email)
-      console.log(resultsFromDB[0])
+      
 
       if(user?.isOwner == true){
+          setUser(resultsFromDB[0])
+      console.log("email is " + user.email)
+      console.log(resultsFromDB[0])
         navigation.navigate("Home")
       }
       else{
@@ -60,7 +61,7 @@ const LoginScreen = ({navigation}) =>{
      }
      
      
-        navigation.navigate('Home');
+       
         } catch(error) {
         console.log(`Error code: ${error.code}`)
         console.log(`Error message: ${error.message}`)
