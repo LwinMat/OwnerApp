@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Platform, StatusBar, SafeAreaView, TextInput, S
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage } from '../firebaseConfig';
 import { addDoc, collection } from 'firebase/firestore';
+import { auth } from '../firebaseConfig';
+
 
 const ListingScreen = ({ navigation }) => {
     const [serviceType, setServiceType] = useState('');
@@ -13,6 +15,7 @@ const ListingScreen = ({ navigation }) => {
     const [includingParts, setIncludingParts] = useState(false);
     const [includingLabor, setIncludingLabor] = useState(false);
     const [imageUri, setImageUri] = useState(null);
+    const [url, setUrl] = useState("")
 
     const handleChoosePhoto = async () => {
         try {
@@ -28,9 +31,9 @@ const ListingScreen = ({ navigation }) => {
         } catch (error) {
             console.error('Error choosing photo: ', error);
         }
-    };
+    
 
-    const handleUploadPhoto = async () => {
+    
         try {
             const response = await fetch(imageUri);
             const blob = await response.blob();
@@ -38,7 +41,7 @@ const ListingScreen = ({ navigation }) => {
             const ref = storage.ref().child(`images/${imageName}`);
             await ref.put(blob);
             const url = await ref.getDownloadURL();
-            return url;
+            setUrl(url);  
         } catch (error) {
             console.error('Error uploading photo: ', error);
         }
@@ -46,11 +49,7 @@ const ListingScreen = ({ navigation }) => {
 
     const handleSubmit = async () => {
         try {
-            let imageUrl = null;
-    
-            if (imageUri) {
-                imageUrl = await handleUploadPhoto();
-            }
+           
     
             // Create an object with the form data
             const newData = {
@@ -58,21 +57,24 @@ const ListingScreen = ({ navigation }) => {
                 description: description,
                 city: city,
                 address: address,
+                image: url,
                 price: price,
                 includingParts: includingParts,
                 includingLabor: includingLabor,
+                ownerEmail: auth.currentUser.email
             };
     
             // Add imageUrl 
-            if (imageUrl) {
-                newData.imageUrl = imageUrl;
-            }
+           
     
             const docRef = await addDoc(collection(db, 'rentalListings'), newData);
             console.log('Document written with ID: ', docRef.id);
+            alert("Listing created!")
+            navigation.navigate('Home')
             
         } catch (error) {
             console.error('Error handling form submission: ', error);
+            alert("Some error in creating the listing")
         }
     };
     
@@ -153,12 +155,7 @@ const ListingScreen = ({ navigation }) => {
                     <Text style={styles.buttonText}>Choose Photo</Text>
                 </Pressable>
 
-                {imageUri && (
-                    <View style={styles.imageContainer}>
-                        <Image source={{ uri: imageUri }} style={styles.image} />
-                    </View>
-                )}
-
+               
                 <Pressable
                     style={styles.button}
                     onPress={handleSubmit}

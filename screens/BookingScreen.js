@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Platform, StatusBar, SafeAreaView, Image, Button, Alert } from 'react-native';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
+import { auth } from '../firebaseConfig';
 
 const BookingScreen = ({ navigation }) => {
     const [bookings, setBookings] = useState([]);
@@ -12,15 +13,48 @@ const BookingScreen = ({ navigation }) => {
 
     const fetchBookings = async () => {
         try {
-            const querySnapshot = await getDocs(collection(db, 'booking'));
-            const data = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setBookings(data);
-        } catch (error) {
-            console.error('Error fetching bookings: ', error);
-        }
+            // Specify which collection and document id to query
+            const q = query(collection(db, "rentalListings"), where("ownerEmail", "==", auth.currentUser.email));
+    
+            const querySnapshot = await getDocs(q);
+            console.log(querySnapshot)
+            const resultsFromDB = []
+    
+            querySnapshot.forEach((currDoc) => {
+              console.log(currDoc.id, " => ", currDoc.data());
+              const user = {
+                  id: currDoc.id,
+                  ...currDoc.data()
+              }
+              resultsFromDB.push(user)
+             
+            
+          })
+          setBookings(resultsFromDB)
+          console.log(bookings)
+          console.log("email is " + user.email)
+          console.log(resultsFromDB[0])
+    
+    
+            // use the .exists() function to check if the document 
+            // could be found
+            
+            
+         } catch (err) {
+            console.log(err)
+         }
+         
+
+        // try {
+        //     const querySnapshot = await getDocs(collection(db, 'booking'), where);
+        //     const data = querySnapshot.docs.map(doc => ({
+        //         id: doc.id,
+        //         ...doc.data()
+        //     }));
+        //     setBookings(data);
+        // } catch (error) {
+        //     console.error('Error fetching bookings: ', error);
+        // }
     };
 
     const handleCancelBooking = async (id) => {
@@ -43,6 +77,8 @@ const BookingScreen = ({ navigation }) => {
         if (item.status === 'CANCELLED') {
             statusColor = '#e74c3c'; }
 
+
+        console.log(item)
         return (
             <View style={[styles.bookingItem, { borderColor: statusColor }]}>
                 <Text>Type of Service: {item.serviceType}</Text>
@@ -50,9 +86,10 @@ const BookingScreen = ({ navigation }) => {
                 <Text>City: {item.city}</Text>
                 <Text>Address: {item.address}</Text>
                 <Text>Price: {item.price}</Text>
+                <Image src={item.image} height={200} width={100}/>
                 <Text>Parts Included: {item.includingParts ? 'Yes' : 'No'}</Text>
                 <Text>Labor Included: {item.includingLabor ? 'Yes' : 'No'}</Text>
-                <Text>Owner Name: {item.ownerName}</Text>
+                <Text>Owner Email: {item.ownerEmail}</Text>
                 {item.ownerPhoto && <Image source={{ uri: item.ownerPhoto }} style={styles.ownerPhoto} />}
                 <Text>Booking Status: {item.status}</Text>
                 <Text>Confirmation Code: {item.confirmationCode}</Text>
