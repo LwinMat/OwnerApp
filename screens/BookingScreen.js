@@ -9,7 +9,7 @@ const BookingScreen = ({ navigation }) => {
 
     useEffect(() => {
         fetchBookings();
-    }, []);
+    }, [bookings]);
 
     const fetchBookings = async () => {
         try {
